@@ -1,19 +1,16 @@
 import streamlit as st
-import pickle 
+import pickle
 import string
-!pip install nltk
 from nltk.corpus import stopwords
 from nltk.stem.porter import PorterStemmer
 import nltk
 
+# Ensure necessary NLTK data is downloaded
 nltk.download('punkt')
-# nltk.download('punkt_tab')
 nltk.download('stopwords')
 
-
-
+# Initialize Porter Stemmer
 ps = PorterStemmer()
-
 
 def transform_text(text):
     text = text.lower()
@@ -39,28 +36,32 @@ def transform_text(text):
 
     return " ".join(y)
 
-
+# Load vectorizer and model
 tk = pickle.load(open("vectorizer.pkl", 'rb'))
 model = pickle.load(open("model.pkl", 'rb'))
 
+# Streamlit app UI
 st.title("Email Spam Classification Application")
-st.write("This is a machine learning project by Megha Vishvkarma to detect spam or ham i.e. not spam")
-    
+st.write("This is a machine learning project by Megha Vishvkarma to detect spam or ham (i.e., not spam).")
 
 user_input = st.text_area("Enter the SMS")
 
 if st.button('Predict'):
+    if user_input:
+        # Preprocess the input text
+        transformed_input = transform_text(user_input)
+        # Vectorize the input text
+        vectorized_data = tk.transform([transformed_input]).toarray()
+        # Predict using the loaded model
+        result = model.predict(vectorized_data)
+        # Display the result
+        if result[0] == 0:
+            st.write("The email is not spam")
+        else:
+            st.write("The email is spam")
+    else:
+        st.write("Please type an email to classify.")
 
-  if user_input:
-      data = [user_input]
-      vectorized_data = tk.transform(data).toarray()
-      result = model.predict(vectorized_data)
-      if result[0]==0:
-          st.write("The email is not spam")
-      else:
-          st.write("The email is spam")
-  else:
-      st.write("Please type Email to classify")
     
     
     
